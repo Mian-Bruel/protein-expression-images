@@ -34,9 +34,8 @@ def download_xml(url: str, gene: str, version: str = "latest") -> None:
     response = requests.get(url)
     response.raise_for_status()
 
-    folder_name = "../xml_files"
-    if not os.path.exists(folder_name):
-        os.mkdir(folder_name)
+    folder_name = "./xml_files"
+    os.makedirs(folder_name, exist_ok=True)
 
     file_name = f"{folder_name}/{gene}_{version}.xml"
     with open(file_name, "w") as file:
@@ -44,7 +43,7 @@ def download_xml(url: str, gene: str, version: str = "latest") -> None:
 
 
 if __name__ == "__main__":
-    gene = "SLC2A3"
+    gene = "A1BG"
     lookup_df = download_lookup_df()
     xml_url = get_gene_xml(gene, lookup_df)
     download_xml(xml_url, gene)
