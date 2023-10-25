@@ -58,7 +58,7 @@ def get_patient_info(root, names):
                     patient_images_info.append(
                         {
                             "gene_names": names,  # This is a list of gene synonyms
-                            "patientId": patient_id,
+                            "patientId": str(patient_id),
                             "sex": sex,
                             "age": age,
                             "staining": staining,
