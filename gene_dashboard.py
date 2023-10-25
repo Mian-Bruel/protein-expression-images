@@ -1,3 +1,6 @@
+import io
+import base64
+
 import pandas as pd
 import streamlit as st
 from pandas.api.types import is_object_dtype, is_numeric_dtype, is_categorical_dtype, is_datetime64_any_dtype
@@ -6,6 +9,19 @@ from xml_utils.xml_parser import load_xml, process_xml
 from xml_utils.xml_loader import download_xml, get_gene_xml, download_lookup_df
 
 st.set_page_config(layout="wide", page_title="Pathology Summary", page_icon=":tada")
+
+
+def create_download_link(df, format: str, filename: str = "filtered_data"):
+    if format == "csv":
+        data = df.to_csv(index=False)
+        filename = "filtered_data.csv"
+    elif format == "excel":
+        with pd.ExcelWriter(f"{filename}.xlsx") as writer:
+            df.to_excel(writer, index=False)
+
+    b64_data = base64.b64encode(data.encode()).decode()
+    href = f'<a href="data:file/{format};base64,{b64_data}" download="{filename}">Download as {format.upper()}</a>'
+    return href
 
 
 def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
@@ -103,7 +119,28 @@ def main(lookup_df):
 
     info_df = pd.DataFrame(all_info)  # with info from all of the selected genes
 
-    st.dataframe(filter_dataframe(info_df))
+    filtered_df = filter_dataframe(info_df)
+    st.dataframe(filtered_df)
+
+    # download the dataframe
+    file_format = st.selectbox("Select file format", ["CSV", "Excel"], index=0)
+
+    buffer = io.BytesIO()
+    if file_format == "CSV":
+        filtered_df.to_csv(buffer, index=False)
+        mime_type = "text/csv"
+        file_ext = "csv"
+    elif file_format == "Excel":
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            filtered_df.to_excel(writer, index=False)
+        mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        file_ext = "xlsx"
+
+    buffer.seek(0)
+
+    st.download_button(
+        label=f"Download Data as {file_format}", data=buffer, file_name=f"filtered_data.{file_ext}", mime=mime_type
+    )
 
 
 if __name__ == "__main__":
