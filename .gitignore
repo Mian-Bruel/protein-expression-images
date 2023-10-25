@@ -1,5 +1,6 @@
 # use case specific
 xml_files/
+images/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

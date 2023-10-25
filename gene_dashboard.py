@@ -6,6 +6,7 @@ import streamlit as st
 from pandas.api.types import is_object_dtype, is_numeric_dtype, is_categorical_dtype, is_datetime64_any_dtype
 
 from xml_utils.xml_parser import load_xml, process_xml
+from xml_utils.image_downloader import zip_images, download_images
 from xml_utils.xml_loader import download_xml, get_gene_xml, download_lookup_df
 
 st.set_page_config(layout="wide", page_title="Pathology Summary", page_icon=":tada")
@@ -141,6 +142,15 @@ def main(lookup_df):
     st.download_button(
         label=f"Download Data as {file_format}", data=buffer, file_name=f"filtered_data.{file_ext}", mime=mime_type
     )
+
+    if st.button("Prepare Image download link"):
+        image_urls = filtered_df["imageUrl"].tolist()
+        image_files = download_images(image_urls)
+        zip_file_path = zip_images(image_files)
+
+        # Provide the zip file for download
+        with open(zip_file_path, "rb") as file:
+            st.download_button(label="Download Images", data=file, file_name="images.zip", mime="application/zip")
 
 
 if __name__ == "__main__":
