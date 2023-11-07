@@ -13,8 +13,7 @@ def get_interactions_from_html(gene: str, url: str) -> pd.DataFrame:
 
     if table is None:
         # to be changed
-        message = f"{gene} has no defined protein interactions."
-        return message
+        return pd.DataFrame(columns=["Interaction", "Interaction type", "Confidence", "MI score", "# Interactions"])
 
     headers = [header.text for header in table.find("thead").find_all("th")]
 
@@ -32,7 +31,7 @@ def get_interactions_from_html(gene: str, url: str) -> pd.DataFrame:
     gene_list = [gene] * len(rows)
     # Create a Pandas DataFrame
     df = pd.DataFrame(data, columns=headers)
-    df['gene'] = gene_list
+    df["gene"] = gene_list
 
 
 if __name__ == "__main__":
