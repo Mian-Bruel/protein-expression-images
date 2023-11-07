@@ -25,9 +25,17 @@ def version_to_xml_url(ensembl_id: str, version: str = "latest") -> str:
     return f"https://{version}.proteinatlas.org/{ensembl_id}.xml"
 
 
-def get_gene_xml(gene: str, lookup_df: pd.DataFrame, version: str = "latest") -> str:
+def version_to_interactions_url(ensembl_id: str, gene: str, version: str = "latest") -> str:
+    version = "www" if version == "latest" else version
+    return f"https://{version}.proteinatlas.org/{ensembl_id}-{gene}/interaction"
+
+
+def get_gene_xml_url(gene: str, lookup_df: pd.DataFrame, version: str = "latest"):
+    """
+    returns links to xml and interactions
+    """
     ensembl_id = lookup_df.loc[lookup_df["gene"] == gene, "ensembl"].iat[0]
-    return version_to_xml_url(ensembl_id, version)
+    return version_to_xml_url(ensembl_id, version), version_to_interactions_url(ensembl_id, gene, version)
 
 
 def download_xml(url: str, gene: str, version: str = "latest") -> None:
