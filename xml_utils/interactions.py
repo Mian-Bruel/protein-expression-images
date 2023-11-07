@@ -32,9 +32,11 @@ def get_interactions_from_html(gene: str, url: str) -> pd.DataFrame:
     df = pd.DataFrame(data, columns=headers)
     df["gene"] = gene_list
 
+    return df
+
 
 if __name__ == "__main__":
-    gene = "EPS8"
-    ensID = "ENSG00000151491"
+    gene = "SLC2A3"
+    ensID = "ENSG00000059804"
     url = f"https://www.proteinatlas.org/{ensID}-{gene}/interaction"
     print(get_interactions_from_html(gene, url))
