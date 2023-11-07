@@ -12,7 +12,6 @@ def get_interactions_from_html(gene: str, url: str) -> pd.DataFrame:
     table = parsed.find("table", class_="sortable")
 
     if table is None:
-        # to be changed
         return pd.DataFrame(columns=["Interaction", "Interaction type", "Confidence", "MI score", "# Interactions"])
 
     headers = [header.text for header in table.find("thead").find_all("th")]
