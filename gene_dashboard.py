@@ -1,7 +1,6 @@
 import io
 import base64
 
-import bs4
 import pandas as pd
 import streamlit as st
 
