@@ -55,5 +55,5 @@ def download_xml(url: str, gene: str, version: str = "latest") -> None:
 if __name__ == "__main__":
     gene = "A1BG"
     lookup_df = download_lookup_df()
-    xml_url = get_gene_xml(gene, lookup_df)
+    xml_url = get_gene_xml_url(gene, lookup_df)
     file_name = download_xml(xml_url, gene)
