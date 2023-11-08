@@ -23,7 +23,10 @@ def download_images(image_urls):
         # Save the image to the local directory
         with open(image_file_path, "wb") as file:
             for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
+                if chunk:
+                    file.write(chunk)
+                    file.flush()
+                    os.fsync(file.fileno())
 
         image_files.append(image_file_path)
 
