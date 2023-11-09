@@ -85,8 +85,24 @@ def process_xml(xml):
 
 
 if __name__ == "__main__":
-    filename = "xml_files/SLC2A3_latest.xml"
+    filename = "xml_files/ANGPTL8_latest.xml"
     xml = load_xml(filename)
     info = process_xml(xml)
-    info_df = pd.DataFrame(info)
+    if len(info) == 0:
+        info_df = pd.DataFrame(
+            columns=[
+                "gene_names",
+                "patientId",
+                "sex",
+                "age",
+                "staining",
+                "intensity",
+                "quantity",
+                "location",
+                "tissueDescriptions",
+                "imageUrl",
+            ]
+        )
+    else:
+        info_df = pd.DataFrame(info)
     print(info_df.head())

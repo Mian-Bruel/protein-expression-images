@@ -178,7 +178,24 @@ def main(lookup_df):
             interactions = interactions.merge(interaction_df, how="outer")
 
         # Update the data in the session state
-        info_df = pd.DataFrame(all_info)  # with info from all of the selected genes
+        if len(all_info) == 0:
+            info_df = pd.DataFrame(
+                columns=[
+                    "gene_names",
+                    "patientId",
+                    "sex",
+                    "age",
+                    "staining",
+                    "intensity",
+                    "quantity",
+                    "location",
+                    "tissueDescriptions",
+                    "imageUrl",
+                ]
+            )
+        else:
+            info_df = pd.DataFrame(info)
+
         filtered_df = apply_filters(info_df, st.session_state.filters)
         st.session_state.filtered_df = filtered_df
         st.session_state.interactions = interactions
