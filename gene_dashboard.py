@@ -194,7 +194,7 @@ def main(lookup_df):
                 ]
             )
         else:
-            info_df = pd.DataFrame(info)
+            info_df = pd.DataFrame(all_info)
 
         filtered_df = apply_filters(info_df, st.session_state.filters)
         st.session_state.filtered_df = filtered_df
