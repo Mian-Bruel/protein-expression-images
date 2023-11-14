@@ -63,6 +63,24 @@ def apply_filters(df, filters):
     return df
 
 
+def apply_filters_interactions(df, filters):
+    if "Interaction type" in filters and filters["Interaction type"] != "Any":
+        df = df[df["Interaction type"] == filters["Interaction type"]]
+
+    if "Confidence" in filters and filters["Confidence"] != "Any":
+        df = df[df["Confidence"] == filters["Confidence"]]
+
+    if "MI score" in filters:
+        min_MI, max_MI = filters["MI score"]
+        df = df[(df["MI score"] >= min_MI) & (df["MI score"] <= max_MI)]
+
+    if "# Interactions" in filters:
+        min_interactions, max_interactions = filters["# Interactions"]
+        df = df[(df["# Interactions"] >= min_interactions) & (df["# Interactions"] <= max_interactions)]
+
+    return df
+
+
 def main(lookup_df):
     # Initialize session state to store the filtered dataframe and gene selections
     if "filters" not in st.session_state:
@@ -80,6 +98,10 @@ def main(lookup_df):
     # Use a form for the entire sidebar to prevent refreshes
     with st.sidebar:
         with st.form(key="sidebar_form"):
+            # Apply filters button
+            submit_button = st.form_submit_button("Apply Changes")
+
+            st.title("Filter main dataframe")
             # Gene selection multiselect
             genes = lookup_df["gene"].unique()
             genes.sort()
@@ -146,8 +168,45 @@ def main(lookup_df):
                 value=st.session_state.filters.get("selected_tissues", ""),
             )
 
-            # Apply filters button
-            submit_button = st.form_submit_button("Apply Changes")
+            st.title("Filter interactions dataframe")
+
+            # Selectbox for interaction type
+            interaction_type_options = ["Any", "Physical association", "Direct interaction"]
+            interaction_type = st.selectbox(
+                "Interaction type",
+                interaction_type_options,
+                index=0
+                if "Interaction type" not in st.session_state.filters
+                or st.session_state.filters["Interaction type"] not in interaction_type_options
+                else interaction_type_options.index(st.session_state.filters["Interaction type"]),
+            )
+
+            # Selectbox for confidence
+            confidence_options = ["Any", "High", "Medium", "Low"]
+            confidence = st.selectbox(
+                "Confidence",
+                confidence_options,
+                index=0
+                if "Confidence" not in st.session_state.filters
+                or st.session_state.filters["Confidence"] not in confidence_options
+                else confidence_options.index(st.session_state.filters["Confidence"]),
+            )
+
+            # Slider for MI score for floats between 0 and 1
+            mi_score = st.slider(
+                "MI score",
+                0.0,
+                1.0,
+                (st.session_state.filters.get("MI score", [0.0, 1.0])),
+            )
+
+            # Slider for # Interactions
+            num_interactions = st.slider(
+                "# Interactions",
+                0,
+                500,
+                (st.session_state.filters.get("# Interactions", [0, 500])),
+            )
 
     if submit_button:
         # Update the rest of the filters
@@ -161,6 +220,10 @@ def main(lookup_df):
                 "quantity": quantity,
                 "location": location,
                 "selected_tissues": tissue_descriptions,
+                "Interaction type": "Any" if interaction_type == "Any" else interaction_type,
+                "Confidence": "Any" if confidence == "Any" else confidence,
+                "MI score": mi_score,
+                "# Interactions": num_interactions,
             }
         )
 
@@ -197,8 +260,9 @@ def main(lookup_df):
             info_df = pd.DataFrame(all_info)
 
         filtered_df = apply_filters(info_df, st.session_state.filters)
+        interactions_filtered = apply_filters_interactions(interactions, st.session_state.filters)
         st.session_state.filtered_df = filtered_df
-        st.session_state.interactions = interactions
+        st.session_state.interactions = interactions_filtered
 
     # Always show the DataFrame and interaction data
 

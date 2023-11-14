@@ -32,6 +32,10 @@ def get_interactions_from_html(gene: str, url: str) -> pd.DataFrame:
     df = pd.DataFrame(data, columns=headers)
     df["gene"] = gene_list
 
+    # change column types for filtering
+    df["MI score"] = df["MI score"].astype(float)
+    df["# Interactions"] = df["# Interactions"].astype(int)
+
     return df
 
 

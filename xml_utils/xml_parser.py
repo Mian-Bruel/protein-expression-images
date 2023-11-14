@@ -18,6 +18,8 @@ def get_synonyms(entry):
 
 
 def get_patient_info(root, names):
+    # FIXME there appears to be an invalid symbol in some XMLs that causes an error
+
     # Create an empty list to store patient info for each image
     patient_images_info = []
 
