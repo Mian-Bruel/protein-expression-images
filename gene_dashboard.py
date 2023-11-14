@@ -120,10 +120,10 @@ def main(lookup_df):
             # Radio buttons for intensity
             intensity = st.selectbox(
                 "Intensity",
-                ["Any", "Weak", "Moderate", "Negative"],
+                ["Any", "Weak", "Moderate", "Strong", "Negative"],
                 index=0
                 if "intensity" not in st.session_state.filters
-                else ["Any", "Weak", "Moderate", "Negative"].index(st.session_state.filters["intensity"]),
+                else ["Any", "Weak", "Moderate", "Strong", "Negative"].index(st.session_state.filters["intensity"]),
             )
 
             quantity_options = ["Any", "75%-25%", ">75%", "None", "<25%"]
