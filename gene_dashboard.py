@@ -40,16 +40,16 @@ def apply_filters(df, filters):
         df = df[(df["age"] >= min_age) & (df["age"] <= max_age)]
 
     # Check and apply staining filter, if 'Any' is not selected
-    if "staining" in filters and filters["staining"] != "Any":
-        df = df[df["staining"] == filters["staining"]]
+    if "staining" in filters and filters["staining"] != []:
+        df = df[df["staining"].isin(filters["staining"])]
 
     # Check and apply intensity filter, if 'Any' is not selected
-    if "intensity" in filters and filters["intensity"] != "Any":
-        df = df[df["intensity"] == filters["intensity"]]
+    if "intensity" in filters and filters["intensity"] != []:
+        df = df[df["intensity"].isin(filters["intensity"])]
 
     # Check and apply quantity filter
-    if "quantity" in filters and filters["quantity"] != "Any":
-        df = df[df["quantity"] == filters["quantity"]]
+    if "quantity" in filters and filters["quantity"] != []:
+        df = df[df["quantity"].isin(filters["quantity"])]
 
     # Check and apply location filter
     if "location" in filters and filters["location"]:
@@ -131,30 +131,24 @@ def main(lookup_df):
             )
 
             # Selectbox for staining
-            staining = st.selectbox(
+            staining = st.multiselect(
                 "Staining",
-                ["Any", "Low", "Medium", "High", "Not detected"],
-                index=0
-                if "staining" not in st.session_state.filters
-                else ["Any", "Low", "Medium", "High", "Not detected"].index(st.session_state.filters["staining"]),
+                options=["Low", "Medium", "High", "Not detected"],
+                default=[],
             )
 
             # Radio buttons for intensity
-            intensity = st.selectbox(
+            intensity = st.multiselect(
                 "Intensity",
-                ["Any", "Weak", "Moderate", "Strong", "Negative"],
-                index=0
-                if "intensity" not in st.session_state.filters
-                else ["Any", "Weak", "Moderate", "Strong", "Negative"].index(st.session_state.filters["intensity"]),
+                options=["Weak", "Moderate", "Strong", "Negative"],
+                default=[],
             )
 
-            quantity_options = ["Any", "75%-25%", ">75%", "None", "<25%"]
-            quantity = st.selectbox(
+            quantity_options = ["75%-25%", ">75%", "None", "<25%"]
+            quantity = st.multiselect(
                 "Quantity",
                 quantity_options,
-                index=0
-                if "quantity" not in st.session_state.filters or st.session_state.filters["quantity"] not in quantity_options
-                else quantity_options.index(st.session_state.filters["quantity"]),
+                default=[],
             )
             # Text input for location
             location = st.text_input(
