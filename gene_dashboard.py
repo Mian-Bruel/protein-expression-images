@@ -40,16 +40,16 @@ def apply_filters(df, filters):
         df = df[(df["age"] >= min_age) & (df["age"] <= max_age)]
 
     # Check and apply staining filter, if 'Any' is not selected
-    if "staining" in filters and filters["staining"] != "Any":
-        df = df[df["staining"] == filters["staining"]]
+    if "staining" in filters and filters["staining"] != []:
+        df = df[df["staining"].isin(filters["staining"])]
 
     # Check and apply intensity filter, if 'Any' is not selected
-    if "intensity" in filters and filters["intensity"] != "Any":
-        df = df[df["intensity"] == filters["intensity"]]
+    if "intensity" in filters and filters["intensity"] != []:
+        df = df[df["intensity"].isin(filters["intensity"])]
 
     # Check and apply quantity filter
-    if "quantity" in filters and filters["quantity"] != "Any":
-        df = df[df["quantity"] == filters["quantity"]]
+    if "quantity" in filters and filters["quantity"] != []:
+        df = df[df["quantity"].isin(filters["quantity"])]
 
     # Check and apply location filter
     if "location" in filters and filters["location"]:
@@ -59,6 +59,24 @@ def apply_filters(df, filters):
     if "selected_tissues" in filters and filters["selected_tissues"]:
         # extract items from tissueDescriptions column and check if filters['selected_tissues'] matches regex
         df = df[df["tissueDescriptions"].astype(str).str.contains(filters["selected_tissues"])]
+
+    return df
+
+
+def apply_filters_interactions(df, filters):
+    if "Interaction type" in filters and filters["Interaction type"] != "Any":
+        df = df[df["Interaction type"] == filters["Interaction type"]]
+
+    if "Confidence" in filters and filters["Confidence"] != "Any":
+        df = df[df["Confidence"] == filters["Confidence"]]
+
+    if "MI score" in filters:
+        min_MI, max_MI = filters["MI score"]
+        df = df[(df["MI score"] >= min_MI) & (df["MI score"] <= max_MI)]
+
+    if "# Interactions" in filters:
+        min_interactions, max_interactions = filters["# Interactions"]
+        df = df[(df["# Interactions"] >= min_interactions) & (df["# Interactions"] <= max_interactions)]
 
     return df
 
@@ -80,6 +98,10 @@ def main(lookup_df):
     # Use a form for the entire sidebar to prevent refreshes
     with st.sidebar:
         with st.form(key="sidebar_form"):
+            # Apply filters button
+            submit_button = st.form_submit_button("Apply Changes")
+
+            st.title("Filter main dataframe")
             # Gene selection multiselect
             genes = lookup_df["gene"].unique()
             genes.sort()
@@ -109,30 +131,24 @@ def main(lookup_df):
             )
 
             # Selectbox for staining
-            staining = st.selectbox(
+            staining = st.multiselect(
                 "Staining",
-                ["Any", "Low", "Medium", "High", "Not detected"],
-                index=0
-                if "staining" not in st.session_state.filters
-                else ["Any", "Low", "Medium", "High", "Not detected"].index(st.session_state.filters["staining"]),
+                options=["Low", "Medium", "High", "Not detected"],
+                default=[],
             )
 
             # Radio buttons for intensity
-            intensity = st.selectbox(
+            intensity = st.multiselect(
                 "Intensity",
-                ["Any", "Weak", "Moderate", "Negative"],
-                index=0
-                if "intensity" not in st.session_state.filters
-                else ["Any", "Weak", "Moderate", "Negative"].index(st.session_state.filters["intensity"]),
+                options=["Weak", "Moderate", "Strong", "Negative"],
+                default=[],
             )
 
-            quantity_options = ["Any", "75%-25%", ">75%", "None", "<25%"]
-            quantity = st.selectbox(
+            quantity_options = ["75%-25%", ">75%", "None", "<25%"]
+            quantity = st.multiselect(
                 "Quantity",
                 quantity_options,
-                index=0
-                if "quantity" not in st.session_state.filters or st.session_state.filters["quantity"] not in quantity_options
-                else quantity_options.index(st.session_state.filters["quantity"]),
+                default=[],
             )
             # Text input for location
             location = st.text_input(
@@ -146,8 +162,45 @@ def main(lookup_df):
                 value=st.session_state.filters.get("selected_tissues", ""),
             )
 
-            # Apply filters button
-            submit_button = st.form_submit_button("Apply Changes")
+            st.title("Filter interactions dataframe")
+
+            # Selectbox for interaction type
+            interaction_type_options = ["Any", "Physical association", "Direct interaction"]
+            interaction_type = st.selectbox(
+                "Interaction type",
+                interaction_type_options,
+                index=0
+                if "Interaction type" not in st.session_state.filters
+                or st.session_state.filters["Interaction type"] not in interaction_type_options
+                else interaction_type_options.index(st.session_state.filters["Interaction type"]),
+            )
+
+            # Selectbox for confidence
+            confidence_options = ["Any", "High", "Medium", "Low"]
+            confidence = st.selectbox(
+                "Confidence",
+                confidence_options,
+                index=0
+                if "Confidence" not in st.session_state.filters
+                or st.session_state.filters["Confidence"] not in confidence_options
+                else confidence_options.index(st.session_state.filters["Confidence"]),
+            )
+
+            # Slider for MI score for floats between 0 and 1
+            mi_score = st.slider(
+                "MI score",
+                0.0,
+                1.0,
+                (st.session_state.filters.get("MI score", [0.0, 1.0])),
+            )
+
+            # Slider for # Interactions
+            num_interactions = st.slider(
+                "# Interactions",
+                0,
+                500,
+                (st.session_state.filters.get("# Interactions", [0, 500])),
+            )
 
     if submit_button:
         # Update the rest of the filters
@@ -161,6 +214,10 @@ def main(lookup_df):
                 "quantity": quantity,
                 "location": location,
                 "selected_tissues": tissue_descriptions,
+                "Interaction type": "Any" if interaction_type == "Any" else interaction_type,
+                "Confidence": "Any" if confidence == "Any" else confidence,
+                "MI score": mi_score,
+                "# Interactions": num_interactions,
             }
         )
 
@@ -197,8 +254,9 @@ def main(lookup_df):
             info_df = pd.DataFrame(all_info)
 
         filtered_df = apply_filters(info_df, st.session_state.filters)
+        interactions_filtered = apply_filters_interactions(interactions, st.session_state.filters)
         st.session_state.filtered_df = filtered_df
-        st.session_state.interactions = interactions
+        st.session_state.interactions = interactions_filtered
 
     # Always show the DataFrame and interaction data
 
