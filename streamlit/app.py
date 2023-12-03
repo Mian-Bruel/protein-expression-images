@@ -13,9 +13,14 @@ st.set_page_config(**PAGE_CONFIG)
 
 def main(lookup_df):
     # Initialize session state to store the filtered dataframe and gene selections
-    if "filtered_df" not in st.session_state or "interactions_df" not in st.session_state:
+    if (
+        "filtered_df" not in st.session_state
+        or "interactions_df" not in st.session_state
+        or "total_number" not in st.session_state
+    ):
         st.session_state["filtered_df"] = pd.DataFrame()
         st.session_state["interactions_df"] = pd.DataFrame()
+        st.session_state["total_number"] = 0
 
     # FIXME: streamlit refreshes this every two-ish seconds
     # It's not a huge deal, but it might be beneficial to fix.
@@ -25,12 +30,15 @@ def main(lookup_df):
 
     # Only process the data when the 'Apply Changes' button is clicked
     if submit_button:
-        st.session_state["filtered_df"], st.session_state["interactions_df"] = process_data(filters, selected_genes, lookup_df)
+        st.session_state["filtered_df"], st.session_state["interactions_df"], st.session_state["total_number"] = process_data(
+            filters, selected_genes, lookup_df
+        )
 
         # TODO: Remove this print
         print("filters:", filters, "Selected genes:", selected_genes, sep="\n")
 
     # Display the data
+    st.markdown(f"## Total entries found: {st.session_state['total_number']}")
     st.dataframe(st.session_state["filtered_df"])
     st.dataframe(st.session_state["interactions_df"])
 

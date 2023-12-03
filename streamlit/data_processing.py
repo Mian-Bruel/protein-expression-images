@@ -1,3 +1,4 @@
+import requests
 import pandas as pd
 
 from xml_utils.xml_loader import get_gene_xml_url
@@ -26,34 +27,91 @@ def process_data(filters, selected_genes, lookup_df):
 
     """
     # Perform the data processing only when the 'Apply Changes' button is clicked
-    all_info = []
 
     interactions = pd.DataFrame(columns=["Interaction", "Interaction type", "Confidence", "MI score", "# Interactions"])
     for gene in selected_genes:
+        break
         xml_url, interaction_url = get_gene_xml_url(gene, lookup_df)
         interaction_df = get_interactions_from_html(gene=gene, url=interaction_url)
         interactions = interactions.merge(interaction_df, how="outer")
-
-    if len(all_info) == 0:
-        filtered_df = pd.DataFrame(
-            columns=[
-                "gene_names",
-                "patientId",
-                "sex",
-                "age",
-                "staining",
-                "intensity",
-                "quantity",
-                "location",
-                "tissueDescriptions",
-                "imageUrl",
-            ]
-        )
-    else:
-        filtered_df = pd.DataFrame(all_info)
 
     # Apply additional filtering based on 'filters' argument
     # You need to implement this part based on how you want to filter the data
     # Example: filtered_df = filtered_df[filtered_df['patientId'] == filters['patientId']]
 
-    return filtered_df, interactions
+    url = "http://localhost/protein-expression/public/api/patients"
+
+    filtered_filters = {"perPage": 100, "page": 1}
+
+    if len(selected_genes) > 0:
+        filtered_filters["genes[]"] = selected_genes
+
+    print(filtered_filters)
+
+    if filters["patientId"] != "":
+        filtered_filters["patientId"] = int(filters["patientId"])
+
+    if filters["sex"] != "Any":
+        filtered_filters["sex"] = filters["sex"].upper()
+
+    filtered_filters["ageFrom"] = filters["age"][0]
+    filtered_filters["ageTo"] = (filters["age"][1],)
+
+    if len(filters["staining"]) > 0:
+        filtered_filters["stainings[]"] = filters["staining"]
+
+    if len(filters["intensity"]) > 0:
+        filtered_filters["intensities[]"] = filters["intensity"]
+
+    if len(filters["quantity"]) > 0:
+        filtered_filters["quantities[]"] = [quantity if quantity != "None" else None for quantity in filters["quantity"]]
+
+    if filters["location"] != "":
+        filtered_filters["location"] = filters["location"]
+
+    if filters["selected_tissues"] != "":
+        filtered_filters["tissueDescription"] = filters["selected_tissues"]
+
+    response = requests.get(url, filtered_filters)
+
+    if response.status_code != 200:
+        print(response.text)
+
+    response_data = response.json()
+
+    total_number = response_data["totalItems"]
+
+    data = response_data["data"]
+
+    processed_data = []
+
+    for entry in data:
+        entry_data = {
+            "staining": entry["staining"],
+            "intensity": entry["intensity"],
+            "quantity": entry["quantity"],
+            "location": entry["location"],
+            "patientId": entry["patient"]["id"],
+            "patientAge": entry["patient"]["age"],
+            "patientSex": entry["patient"]["sex"],
+            "geneName": entry["gene"]["name"],
+        }
+
+        images = []
+        tissue_description = ""
+
+        for sample in entry["samples"]:
+            images.append(sample["img"])
+            description = sample["tissueDescription"]
+
+            if len(description) > len(tissue_description):
+                tissue_description = description
+
+        entry_data["tissue_description"] = tissue_description
+        entry_data["images"] = ", ".join(images)
+
+        processed_data.append(entry_data)
+
+    filtered_df = pd.DataFrame(processed_data)
+
+    return filtered_df, interactions, total_number
