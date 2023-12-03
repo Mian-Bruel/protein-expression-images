@@ -5,6 +5,26 @@ from xml_utils.interactions import get_interactions_from_html
 
 
 def process_data(filters, selected_genes, lookup_df):
+    """
+    Process the data based on the filters and selected genes
+
+    This function is called when the 'Apply Changes' button is clicked.
+
+
+    Args:
+        filters (dict): A dictionary of the values of the filters.
+        selected_genes (list): A list of the selected genes.
+        lookup_df (pd.DataFrame): The lookup dataframe. With the gene names and their corresponding XML URLs.
+
+    Returns:
+        filtered_df (pd.DataFrame): The filtered dataframe.
+        interactions (pd.DataFrame): The interactions dataframe.
+
+    TODO: Communicate with the server with the selected genes and filters to get the filtered dataframe.
+        We'll be using requests library to do this.
+    For now the interactions dataframe is left as is. We might add it to PHP later.
+
+    """
     # Perform the data processing only when the 'Apply Changes' button is clicked
     all_info = []
 

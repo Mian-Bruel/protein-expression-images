@@ -7,6 +7,21 @@ from xml_utils.image_downloader import zip_images, download_images
 
 
 def handle_downloads(filtered_df, interactions_df):
+    """
+    Handle the download buttons. Show the buttons and download the data when they're clicked.
+
+    Args:
+        filtered_df (pd.DataFrame): The filtered dataframe.
+        interactions_df (pd.DataFrame): The interactions dataframe.
+
+    Returns:
+        None
+
+    Note:
+        The interactions_df is not used in this function. Left here for future use.
+    TODO:
+        Remove the note when the interactions_df is used.
+    """
     # Download the filtered dataframe as CSV
     buffer_csv = io.BytesIO()
     filtered_df.to_csv(buffer_csv, index=False)
