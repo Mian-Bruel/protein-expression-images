@@ -38,7 +38,7 @@ def render_sidebar(lookup_df):
             staining = st.multiselect("Staining", options=["Low", "Medium", "High", "Not detected"], default=[])
 
             # Radio buttons for intensity
-            intensity = st.multiselect("Intensity", options=["Weak", "Moderate", "Strong", "Negative"], default=[])
+            # intensity = st.multiselect("Intensity", options=["Weak", "Moderate", "Strong", "Negative"], default=[]) # FIXME: Please
 
             quantity_options = ["75%-25%", ">75%", "None", "<25%"]
             quantity = st.multiselect("Quantity", quantity_options, default=[])
@@ -71,7 +71,7 @@ def render_sidebar(lookup_df):
         "sex": sex,
         "age": age,
         "staining": staining,
-        "intensity": intensity,
+        # "intensity": intensity, FIXME: I want to work
         "quantity": quantity,
         "location": location,
         "selected_tissues": tissue_descriptions,

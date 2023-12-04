@@ -39,9 +39,7 @@ def process_data(filters, selected_genes, lookup_df, page):
         interaction_df = get_interactions_from_html(gene=gene, url=interaction_url)
         interactions = interactions.merge(interaction_df, how="outer")
 
-    # Apply additional filtering based on 'filters' argument
-    # You need to implement this part based on how you want to filter the data
-    # Example: filtered_df = filtered_df[filtered_df['patientId'] == filters['patientId']]
+    # TODO: Make sure it works with streamlit.
     load_dotenv()
     url = os.getenv("API_URL")
 
@@ -62,8 +60,8 @@ def process_data(filters, selected_genes, lookup_df, page):
     if len(filters["staining"]) > 0:
         filtered_filters["stainings[]"] = filters["staining"]
 
-    if len(filters["intensity"]) > 0:
-        filtered_filters["intensities[]"] = filters["intensity"]
+    # if len(filters["intensity"]) > 0: # FIXME: I want to live
+    #     filtered_filters["intensities[]"] = filters["intensity"]
 
     if len(filters["quantity"]) > 0:
         filtered_filters["quantities[]"] = [quantity if quantity != "None" else None for quantity in filters["quantity"]]
@@ -90,7 +88,7 @@ def process_data(filters, selected_genes, lookup_df, page):
     for entry in data:
         entry_data = {
             "staining": entry["staining"],
-            "intensity": entry["intensity"],
+            # "intensity": entry["intensity"], # FIXME: Grep failed
             "quantity": entry["quantity"],
             "location": entry["location"],
             "patientId": entry["patient"]["id"],

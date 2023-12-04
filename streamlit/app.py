@@ -32,15 +32,19 @@ def main(lookup_df):
 
     max_pages = (st.session_state["total_number"] // PAGE_SIZE + 1) if st.session_state["total_number"] > 0 else 1
     # page button:
-    page = st.number_input("Page", min_value=1, max_value=max_pages, value=1, step=1)
+    cols = st.columns([2, 1, 2])
+    page = cols[1].number_input("Page", min_value=1, max_value=max_pages, value=1, step=1)
 
     st.session_state["filtered_df"], st.session_state["interactions_df"], st.session_state["total_number"] = process_data(
         filters, selected_genes, lookup_df, page
     )
 
+    dataframe_columns = st.columns([1, 5, 1])
     # Display the data
-    st.markdown(f"Displaying **{len(st.session_state['filtered_df'])}** out of **{st.session_state['total_number']}** results")
-    st.dataframe(st.session_state["filtered_df"])
+    dataframe_columns[1].markdown(
+        f"Displaying **{len(st.session_state['filtered_df'])}** out of **{st.session_state['total_number']}** results"
+    )
+    dataframe_columns[1].dataframe(st.session_state["filtered_df"])
 
     # TODO: st.dataframe(st.session_state["interactions_df"])
 
