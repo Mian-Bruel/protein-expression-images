@@ -17,10 +17,12 @@ def main(lookup_df):
         "filtered_df" not in st.session_state
         or "interactions_df" not in st.session_state
         or "total_number" not in st.session_state
+        or "df_page" not in st.session_state
     ):
         st.session_state["filtered_df"] = pd.DataFrame()
         st.session_state["interactions_df"] = pd.DataFrame()
         st.session_state["total_number"] = 0
+        st.session_state["df_page"] = 1
 
     # FIXME: streamlit refreshes this every two-ish seconds
     # It's not a huge deal, but it might be beneficial to fix.
@@ -31,16 +33,19 @@ def main(lookup_df):
     # Only process the data when the 'Apply Changes' button is clicked
     if submit_button:
         st.session_state["filtered_df"], st.session_state["interactions_df"], st.session_state["total_number"] = process_data(
-            filters, selected_genes, lookup_df
+            filters, selected_genes, lookup_df, st.session_state["df_page"]
         )
 
         # TODO: Remove this print
         print("filters:", filters, "Selected genes:", selected_genes, sep="\n")
 
     # Display the data
-    st.markdown(f"## Total entries found: {st.session_state['total_number']}")
+    st.markdown(f"Displaying **{len(st.session_state['filtered_df'])}** out of **{st.session_state['total_number']}** results")
     st.dataframe(st.session_state["filtered_df"])
-    st.dataframe(st.session_state["interactions_df"])
+    # change page buttons
+    st.selectbox("Go to page:", range(1, st.session_state["total_number"] // 100 + 1), key="df_page")
+
+    # TODO: st.dataframe(st.session_state["interactions_df"])
 
     # Display download buttons / handle their clicks
     handle_downloads(st.session_state["filtered_df"], st.session_state["interactions_df"])

@@ -5,7 +5,7 @@ from xml_utils.xml_loader import get_gene_xml_url
 from xml_utils.interactions import get_interactions_from_html
 
 
-def process_data(filters, selected_genes, lookup_df):
+def process_data(filters, selected_genes, lookup_df, page):
     """
     Process the data based on the filters and selected genes
 
@@ -31,6 +31,7 @@ def process_data(filters, selected_genes, lookup_df):
     interactions = pd.DataFrame(columns=["Interaction", "Interaction type", "Confidence", "MI score", "# Interactions"])
     for gene in selected_genes:
         break
+        # TODO: interactions from rest api
         xml_url, interaction_url = get_gene_xml_url(gene, lookup_df)
         interaction_df = get_interactions_from_html(gene=gene, url=interaction_url)
         interactions = interactions.merge(interaction_df, how="outer")
@@ -41,7 +42,7 @@ def process_data(filters, selected_genes, lookup_df):
 
     url = "http://localhost/protein-expression/public/api/patients"
 
-    filtered_filters = {"perPage": 100, "page": 1}
+    filtered_filters = {"perPage": 100, "page": page}
 
     if len(selected_genes) > 0:
         filtered_filters["genes[]"] = selected_genes
