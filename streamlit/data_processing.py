@@ -1,5 +1,8 @@
+import os
+
 import requests
 import pandas as pd
+from dotenv import load_dotenv
 
 from xml_utils.xml_loader import get_gene_xml_url
 from xml_utils.interactions import get_interactions_from_html
@@ -39,8 +42,8 @@ def process_data(filters, selected_genes, lookup_df, page):
     # Apply additional filtering based on 'filters' argument
     # You need to implement this part based on how you want to filter the data
     # Example: filtered_df = filtered_df[filtered_df['patientId'] == filters['patientId']]
-
-    url = "http://localhost/protein-expression/public/api/patients"
+    load_dotenv()
+    url = os.getenv("API_URL")
 
     filtered_filters = {"perPage": 100, "page": page}
 
@@ -76,7 +79,7 @@ def process_data(filters, selected_genes, lookup_df, page):
     response = requests.get(url, filtered_filters)
 
     if response.status_code != 200:
-        print(response.text)
+        return pd.DataFrame(), interactions, 0
 
     response_data = response.json()
 

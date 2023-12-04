@@ -10,6 +10,8 @@ from xml_utils.xml_loader import download_lookup_df
 # Set page configuration
 st.set_page_config(**PAGE_CONFIG)
 
+PAGE_SIZE = 100
+
 
 def main(lookup_df):
     # Initialize session state to store the filtered dataframe and gene selections
@@ -17,33 +19,28 @@ def main(lookup_df):
         "filtered_df" not in st.session_state
         or "interactions_df" not in st.session_state
         or "total_number" not in st.session_state
-        or "df_page" not in st.session_state
     ):
         st.session_state["filtered_df"] = pd.DataFrame()
         st.session_state["interactions_df"] = pd.DataFrame()
         st.session_state["total_number"] = 0
-        st.session_state["df_page"] = 1
 
     # FIXME: streamlit refreshes this every two-ish seconds
     # It's not a huge deal, but it might be beneficial to fix.
 
     # Render the sidebar and get the values from it
-    submit_button, filters, selected_genes = render_sidebar(lookup_df)
+    _, filters, selected_genes = render_sidebar(lookup_df)
 
-    # Only process the data when the 'Apply Changes' button is clicked
-    if submit_button:
-        st.session_state["filtered_df"], st.session_state["interactions_df"], st.session_state["total_number"] = process_data(
-            filters, selected_genes, lookup_df, st.session_state["df_page"]
-        )
+    max_pages = (st.session_state["total_number"] // PAGE_SIZE + 1) if st.session_state["total_number"] > 0 else 1
+    # page button:
+    page = st.number_input("Page", min_value=1, max_value=max_pages, value=1, step=1)
 
-        # TODO: Remove this print
-        print("filters:", filters, "Selected genes:", selected_genes, sep="\n")
+    st.session_state["filtered_df"], st.session_state["interactions_df"], st.session_state["total_number"] = process_data(
+        filters, selected_genes, lookup_df, page
+    )
 
     # Display the data
     st.markdown(f"Displaying **{len(st.session_state['filtered_df'])}** out of **{st.session_state['total_number']}** results")
     st.dataframe(st.session_state["filtered_df"])
-    # change page buttons
-    st.selectbox("Go to page:", range(1, st.session_state["total_number"] // 100 + 1), key="df_page")
 
     # TODO: st.dataframe(st.session_state["interactions_df"])
 

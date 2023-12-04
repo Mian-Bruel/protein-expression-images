@@ -19,6 +19,7 @@ def render_sidebar(lookup_df):
             submit_button = st.form_submit_button("Apply Changes")
 
             st.title("Filter main dataframe")
+
             # Gene selection multiselect
             genes = lookup_df["gene"].unique()
             genes.sort()
@@ -48,21 +49,21 @@ def render_sidebar(lookup_df):
             # Multiselect for tissue descriptions
             tissue_descriptions = st.text_input("Tissue Descriptions")
 
-            st.title("Filter interactions dataframe")
+            # st.title("Filter interactions dataframe")
 
-            # Selectbox for interaction type
-            interaction_type_options = ["Any", "Physical association", "Direct interaction"]
-            interaction_type = st.selectbox("Interaction type", interaction_type_options, index=0)
+            # # Selectbox for interaction type
+            # interaction_type_options = ["Any", "Physical association", "Direct interaction"]
+            # interaction_type = st.selectbox("Interaction type", interaction_type_options, index=0)
 
-            # Selectbox for confidence
-            confidence_options = ["Any", "High", "Medium", "Low"]
-            confidence = st.selectbox("Confidence", confidence_options, index=0)
+            # # Selectbox for confidence
+            # confidence_options = ["Any", "High", "Medium", "Low"]
+            # confidence = st.selectbox("Confidence", confidence_options, index=0)
 
-            # Slider for MI score for floats between 0 and 1
-            mi_score = st.slider("MI score", 0.0, 1.0, (0.0, 1.0))
+            # # Slider for MI score for floats between 0 and 1
+            # mi_score = st.slider("MI score", 0.0, 1.0, (0.0, 1.0))
 
-            # Slider for # Interactions
-            num_interactions = st.slider("# Interactions", 0, 500, (0, 500))
+            # # Slider for # Interactions
+            # num_interactions = st.slider("# Interactions", 0, 500, (0, 500))
 
     # Return the values from the sidebar
     filters = {
@@ -74,10 +75,10 @@ def render_sidebar(lookup_df):
         "quantity": quantity,
         "location": location,
         "selected_tissues": tissue_descriptions,
-        "interaction_type": interaction_type,
-        "confidence": confidence,
-        "mi_score": mi_score,
-        "num_interactions": num_interactions,
+        # "interaction_type": interaction_type,
+        # "confidence": confidence,
+        # "mi_score": mi_score,
+        # "num_interactions": num_interactions,
     }
 
     return submit_button, filters, selected_genes
