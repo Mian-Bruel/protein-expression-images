@@ -44,6 +44,15 @@ def handle_downloads(filtered_df, interactions_df):
 
     # The image download functionality remains unchanged
     if col[3].button("Prepare Image download link"):
+        st.info(
+            """
+                We have moved the functionality to download images to a separate package \n
+                Install with:  ```pip install PaTho``` \n
+                images.txt file should have been downloaded \n
+                you can now run ```PaTho -f images.txt -d <where/to/save> -b http://images.proteinatlas.org/```
+                """,
+            icon="🤖",
+        )
         image_urls = filtered_df["images"]
         # handle rows with multiple images
         image_urls = image_urls.str.split(",").explode().str.strip().dropna().tolist()
