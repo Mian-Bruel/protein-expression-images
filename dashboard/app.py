@@ -3,10 +3,9 @@ import streamlit as st
 from dotenv import load_dotenv
 from constants import PAGE_CONFIG
 from sidebar import render_sidebar
+from utils import download_lookup_df
 from data_processing import process_data
 from download_handlers import handle_downloads
-
-from xml_utils.xml_loader import download_lookup_df
 
 # Set page configuration
 st.set_page_config(**PAGE_CONFIG)

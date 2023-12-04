@@ -1,8 +1,5 @@
 import pandas as pd
-from utils import send_request
-
-from xml_utils.xml_loader import get_gene_xml_url
-from xml_utils.interactions import get_interactions_from_html
+from utils import send_request, get_gene_xml_url, get_interactions_from_html
 
 
 def process_data(filters, selected_genes, lookup_df, page):
