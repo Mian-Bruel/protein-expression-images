@@ -50,8 +50,6 @@ def process_data(filters, selected_genes, lookup_df, page):
     if len(selected_genes) > 0:
         filtered_filters["genes[]"] = selected_genes
 
-    print(filtered_filters)
-
     if filters["patientId"] != "":
         filtered_filters["patientId"] = int(filters["patientId"])
 
