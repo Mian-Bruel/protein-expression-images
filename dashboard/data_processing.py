@@ -1,8 +1,5 @@
-import os
-
-import requests
 import pandas as pd
-from dotenv import load_dotenv
+from utils import send_request
 
 from xml_utils.xml_loader import get_gene_xml_url
 from xml_utils.interactions import get_interactions_from_html
@@ -39,56 +36,22 @@ def process_data(filters, selected_genes, lookup_df, page):
         interaction_df = get_interactions_from_html(gene=gene, url=interaction_url)
         interactions = interactions.merge(interaction_df, how="outer")
 
-    # TODO: Make sure it works with streamlit.
-    load_dotenv()
-    url = os.getenv("API_URL")
+    response = send_request(filters, "list", selected_genes=selected_genes, page=page)
 
-    filtered_filters = {"perPage": 100, "page": page}
-
-    if len(selected_genes) > 0:
-        filtered_filters["genes[]"] = selected_genes
-
-    if filters["patientId"] != "":
-        filtered_filters["patientId"] = int(filters["patientId"])
-
-    if filters["sex"] != "Any":
-        filtered_filters["sex"] = filters["sex"].upper()
-
-    filtered_filters["ageFrom"] = filters["age"][0]
-    filtered_filters["ageTo"] = (filters["age"][1],)
-
-    if len(filters["staining"]) > 0:
-        filtered_filters["stainings[]"] = filters["staining"]
-
-    # if len(filters["intensity"]) > 0: # FIXME: I want to live
-    #     filtered_filters["intensities[]"] = filters["intensity"]
-
-    if len(filters["quantity"]) > 0:
-        filtered_filters["quantities[]"] = [quantity if quantity != "None" else None for quantity in filters["quantity"]]
-
-    if filters["location"] != "":
-        filtered_filters["location"] = filters["location"]
-
-    if filters["selected_tissues"] != "":
-        filtered_filters["tissueDescription"] = filters["selected_tissues"]
-
-    response = requests.get(url, filtered_filters)
-
+    # If the response is not 200, return an empty dataframe
     if response.status_code != 200:
         return pd.DataFrame(), interactions, 0
 
     response_data = response.json()
 
     total_number = response_data["totalItems"]
-
     data = response_data["data"]
-
     processed_data = []
 
     for entry in data:
         entry_data = {
             "staining": entry["staining"],
-            # "intensity": entry["intensity"], # FIXME: Grep failed
+            "intensity": entry["intensity"],  # FIXME: Grep failed
             "quantity": entry["quantity"],
             "location": entry["location"],
             "patientId": entry["patient"]["id"],

@@ -1,10 +1,11 @@
 import pandas as pd
+import streamlit as st
+from dotenv import load_dotenv
 from constants import PAGE_CONFIG
 from sidebar import render_sidebar
 from data_processing import process_data
 from download_handlers import handle_downloads
 
-import streamlit as st
 from xml_utils.xml_loader import download_lookup_df
 
 # Set page configuration
@@ -49,9 +50,10 @@ def main(lookup_df):
     # TODO: st.dataframe(st.session_state["interactions_df"])
 
     # Display download buttons / handle their clicks
-    handle_downloads(st.session_state["filtered_df"], st.session_state["interactions_df"])
+    handle_downloads(filters, selected_genes)
 
 
 if __name__ == "__main__":
+    load_dotenv()
     lookup_df = download_lookup_df()
     main(lookup_df=lookup_df)
